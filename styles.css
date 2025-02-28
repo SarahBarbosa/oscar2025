@@ -60,17 +60,6 @@ main {
   margin-top: 20px;
 }
 
-@media (max-width: 768px) {
-  #categories-container {
-    display: block !important; /* Remove a grid */
-  }
-  .category {
-    width: 100% !important; /* Faz cada categoria ocupar 100% da tela */
-    display: block;
-  }
-}
-
-
 /* Faz com que a categoria 'Melhor Filme' ocupe as 2 colunas */
 .full-width {
   grid-column: span 2;
@@ -81,6 +70,25 @@ main {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+}
+
+@media (max-width: 768px) {
+  #categories-container {
+    display: block !important; /* Remove a grid */
+  }
+  .category {
+    width: 100% !important; /* Faz cada categoria ocupar 100% da tela */
+    display: block;
+    margin-bottom: 30px !important;
+  }
+  .full-width {
+    grid-column: span 1 !important;
+  }
+
+  /* As opções dentro de 'Melhor Filme' ficam em uma única coluna */
+  .options-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Estilo para cada categoria */
