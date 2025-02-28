@@ -259,6 +259,11 @@ const categories = [
       ]
     }
   ];
+
+  // Variáveis para armazenar as escolhas do usuário, status de confirmação e pontuação
+  let userPicks = {};
+  let categoryConfirmed = {};
+  let score = 0;
   
   // Gerar as categorias dinamicamente
   const container = document.getElementById("categories-container");
@@ -318,29 +323,98 @@ const categories = [
     container.appendChild(section);
   });
 
-  // Exibir as previsões em cards com imagem, categoria e valor selecionado
+  // -------------- EXIBE OS RESULTADOS DAS PREVISÕES --------------
+
   document.getElementById("oscarForm").addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    let resultHTML = '<h2>Suas Previsões</h2>';
+
+    // Reinicia as variáveis sempre que o formulário for enviado
+    userPicks = {};
+    categoryConfirmed = {};
+    score = 0;
+
+    let resultHTML = "<h2>Suas Previsões</h2>";
     resultHTML += '<div class="predictions-grid">';
-    
+
     categories.forEach(category => {
       const selectedValue = formData.get(category.key);
       if (selectedValue) {
-        // Encontra a opção selecionada para obter a imagem
+        userPicks[category.key] = selectedValue;
+        categoryConfirmed[category.key] = false;
+
+        // Localiza a opção para exibir a imagem
         const option = category.options.find(opt => opt.value === selectedValue);
-        resultHTML += `
-          <div class="prediction-card">
-            <h3>${category.name}</h3>
-            ${option ? `<img src="images/${option.image}" alt="${option.value}" class="result-img">` : ''}
-            <p>${option ? option.value : selectedValue}</p>
-          </div>
-        `;
+
+        let optionsContainer = null;
+
+        resultHTML += `<div class="prediction-card">
+          <h3>${category.name}</h3>
+          ${ option ? `<img src="images/${option.image}" alt="${option.value}" class="result-img">` : "" }
+          <p>${selectedValue}</p>
+          <br>
+          <p><strong>And the Oscar goes to...</strong></p>
+          <div class="real-winner">`;
+        
+        // Gera os botões para marcar o vencedor real
+        if (optionsContainer) {
+          category.options.forEach(nominee => {
+            optionsContainer.innerHTML += `<button type="button" onclick="markAsWinner('${category.key}', '${nominee.value}')">${nominee.value}</button>`;
+          });
+          resultHTML += optionsContainer.outerHTML;
+        } else {
+          category.options.forEach(nominee => {
+            resultHTML += `<button type="button" onclick="markAsWinner('${category.key}', '${nominee.value}')">${nominee.value}</button>`;
+          });
+        }
+
+        resultHTML += `</div></div>`;
       }
     });
-    
-    resultHTML += '</div>';
+
+    resultHTML += "</div>";
+    resultHTML += `<div id="scoreArea" style="margin-top:20px; font-size:1.2rem;">Pontuação atual: ${score}</div>`;
+
     document.getElementById("results").innerHTML = resultHTML;
   });
-    
+
+  // -------------- FUNÇÃO PARA MARCAR O VENCEDOR REAL --------------
+
+  // Ao clicar num botão, verifica se a escolha do usuário bate com o vencedor real
+  function markAsWinner(categoryKey, nomineeValue) {
+    if (categoryConfirmed[categoryKey]) {
+      return; // Já foi confirmado, não faz nada
+    }
+    categoryConfirmed[categoryKey] = true;
+
+    // Se a previsão do usuário for igual à opção marcada como vencedora, incrementa a pontuação
+    if (userPicks[categoryKey] === nomineeValue) {
+      score++;
+    }
+
+    // Atualiza o placar na tela
+    const scoreArea = document.getElementById("scoreArea");
+    if (scoreArea) {
+      scoreArea.textContent = `Pontuação atual: ${score}`;
+    }
+
+    // Desabilita os botões dessa categoria para evitar cliques adicionais
+    const cards = document.querySelectorAll(".prediction-card");
+    cards.forEach(card => {
+      const header = card.querySelector("h3");
+      if (header && header.textContent === getCategoryName(categoryKey)) {
+        const buttons = card.querySelectorAll(".real-winner button");
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          btn.style.opacity = "0.6";
+          btn.style.cursor = "not-allowed";
+        });
+      }
+    });
+  }
+
+  // Função auxiliar para mapear a chave da categoria para o nome exibido
+  function getCategoryName(key) {
+    const cat = categories.find(c => c.key === key);
+    return cat ? cat.name : key;
+  }
