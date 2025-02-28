@@ -60,6 +60,17 @@ main {
   margin-top: 20px;
 }
 
+@media (max-width: 768px) {
+  #categories-container {
+    display: block !important; /* Remove a grid */
+  }
+  .category {
+    width: 100% !important; /* Faz cada categoria ocupar 100% da tela */
+    display: block;
+  }
+}
+
+
 /* Faz com que a categoria 'Melhor Filme' ocupe as 2 colunas */
 .full-width {
   grid-column: span 2;
@@ -229,10 +240,4 @@ button:hover {
 .option input[type="radio"]:checked {
   background-color: #D4AF37;
   border-color: #D4AF37;
-}
-
-@media (max-width: 600px) {
-  #categories-container {
-    grid-template-columns: 1fr !important;
-  }
 }
